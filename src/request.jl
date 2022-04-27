@@ -93,7 +93,7 @@ function getparsed(token, path, parameters = nothing, skip404 = true, verbose = 
     end
     resp = dorequest(req, skip404 = skip404, verbose = verbose)
     ret = parseresponse(resp)
-    return haskey(ret, "obj") ? ret["obj"] : ret
+    return ret
 end
 
 function getparameters(request::Request)
