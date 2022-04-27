@@ -1,7 +1,7 @@
 name = "Chartmetric"
 uuid = "5e0982d9-853c-416b-a9e6-ad7fe38a6229"
 authors = ["Daniel Winkler <danielw2904@disroot.org> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
