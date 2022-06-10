@@ -49,7 +49,7 @@ function ratelimitprotect(response::HTTP.Messages.Response; verbose = false)
         resetin =  haskey(headers, "X-RateLimit-Reset") ? parse(Int, headers["X-RateLimit-Reset"]) - time() : 60
         sleepfor = maximum([0.1, resetin])
         verbose && println("Protecting rate limit")
-        sleep((sleepfor + 5))
+        sleep((sleepfor + 1))
     end
     return nothing
 end
