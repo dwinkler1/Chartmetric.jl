@@ -66,7 +66,8 @@ function dorequest(request::Request; skip404 = true, verbose = false)
             code ∈ 200:399 && break
             if i == (maxtries-1)
                 @warn "Error getting request"
-                #println(resp)
+                verbose && println(request.url)
+                verbose && println(resp)
             end # if
         end # for
     end # if
