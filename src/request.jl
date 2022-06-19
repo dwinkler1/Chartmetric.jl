@@ -162,7 +162,8 @@ end
 function requestprotector(response::HTTP.Messages.Response,
                         request::Request; verbose = false)
     code = response.status
-    code != 200 && verbose && println("Code: $code")
+    # Do not print success or ratelimit code
+    code ∉ [200, 429] && verbose && println("Code: $code")
     if code ∈ 400:499
         code == 401 && newtoken!(request.token)
         ratelimitprotect(response, verbose = verbose)

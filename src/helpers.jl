@@ -18,10 +18,10 @@ function parseresponse(response::HTTP.Messages.Response)
         try
             ret_dict["return"] = JSON.parse(String(bod))
         catch e
-            ret_dict["return"] = missing 
+            ret_dict["return"] = missing
         end
         return ret_dict
-    end   
+    end
     ret_dict = JSON.parse(String(bod))
     return ret_dict
 end
@@ -48,7 +48,7 @@ function ratelimitprotect(response::HTTP.Messages.Response; verbose = false)
     if remaining < 1
         resetin =  haskey(headers, "X-RateLimit-Reset") ? parse(Int, headers["X-RateLimit-Reset"]) - time() : 60
         sleepfor = maximum([0.1, resetin])
-        verbose && println("Protecting rate limit")
+        #verbose && println("Protecting rate limit")
         sleep((sleepfor + 1))
     end
     return nothing
