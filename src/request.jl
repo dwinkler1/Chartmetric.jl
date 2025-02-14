@@ -19,7 +19,7 @@ mutable struct Request
     maxtries::Int
     sleeptime::Number
     state::Dict
-    function Request(token::Token, url; maxtries = nothing, sleeptime::Number = 600, state = Dict())
+    function Request(token::Token, url; maxtries=nothing, sleeptime::Number=600, state=Dict())
         tokenprotector!(token)
         @assert sleeptime >= 0 "sleeptime cannot be negative"
         maxtries === nothing && (maxtries = token.maxtries)
@@ -29,7 +29,7 @@ mutable struct Request
     end # fun
 end # struct
 
-Request(refreshtoken::String, url; maxtries = nothing, sleeptime = 600, state = Dict()) = Request(Token(refreshtoken), url, maxtries = maxtries, sleeptime = sleeptime, state = state)
+Request(refreshtoken::String, url; maxtries=nothing, sleeptime=600, state=Dict()) = Request(Token(refreshtoken), url, maxtries=maxtries, sleeptime=sleeptime, state=state)
 
 # Exported
 
@@ -44,16 +44,16 @@ Run the request using a `Request` object
 - `skip404 = true` : If `true` 404 errors will not be retried
 - `verbose = false` : If `true` all unusual events (e.g. rate limit is hit) will print a message
 """
-function dorequest(request::Request; skip404 = true, verbose = false)
+function dorequest(request::Request; skip404=true, verbose=false)
     tokenprotector!(request.token)
     token = request.token
     url = request.url
     maxtries = request.maxtries
     header = ["Authorization" => string("Bearer ", token.token)]
     req = :(HTTP.request("GET",
-                $url, $header, status_exception = false))
+        $url, $header, status_exception=false))
     resp = eval(req)
-    code = requestprotector(resp, request, verbose = verbose)
+    code = requestprotector(resp, request, verbose=verbose)
     if code ∉ 200:399
         for i ∈ 1:(maxtries-1)
             if skip404 && code == 404
@@ -62,9 +62,9 @@ function dorequest(request::Request; skip404 = true, verbose = false)
                 break
             end
             resp = eval(req)
-            code = requestprotector(resp, request, verbose = verbose)
+            code = requestprotector(resp, request, verbose=verbose)
             code ∈ 200:399 && break
-            if i == (maxtries-1)
+            if i == (maxtries - 1)
                 @warn "Error getting request"
                 verbose && println(request.url)
                 verbose && println(resp)
@@ -86,13 +86,13 @@ Do a full request and return a Dict of the response. Keyword arguments are passe
 - `skip404 = true` : If `true` 404 errors will not be retried
 - `verbose = false` : If `true` all unusual events (e.g. rate limit is hit) will print a message
 """
-function getparsed(token, path, parameters = nothing, skip404 = true, verbose = false; maxtries = 5, sleeptime = 2)
+function getparsed(token, path, parameters=nothing, skip404=true, verbose=false; maxtries=5, sleeptime=2)
     url = buildrequesturl(path)
-    req = Request(token, url; maxtries = maxtries, sleeptime = sleeptime)
+    req = Request(token, url; maxtries=maxtries, sleeptime=sleeptime)
     if !isnothing(parameters)
         setparameters!(req, parameters)
     end
-    resp = dorequest(req, skip404 = skip404, verbose = verbose)
+    resp = dorequest(req, skip404=skip404, verbose=verbose)
     ret = parseresponse(resp)
     return ret
 end
@@ -105,14 +105,14 @@ function getparameters(request::Request)
     return params
 end
 
-function setparameters!(request::Request, parameters::Array{String,1}; add::Bool = false)
-    parameters = parameters[length.(parameters) .> 0]
+function setparameters!(request::Request, parameters::Array{String,1}; add::Bool=false)
+    parameters = parameters[length.(parameters).>0]
     url_old = request.url
     add && append!(parameters, getparameters(request))
 
     parameters = replace.(parameters, r"\s+" => "")
     paramstring = join(parameters, '&')
-    hasparam = length(paramstring)>0
+    hasparam = length(paramstring) > 0
     if occursin(r"\?", url_old)
         url_base = match(r".*(?=\?)", url_old).match
         url_new = hasparam ? url_base * '?' * paramstring : url_base
@@ -123,12 +123,13 @@ function setparameters!(request::Request, parameters::Array{String,1}; add::Bool
     return request
 end
 
-parsedict(d)=["$k=$v" for (k,v) in d]
-setparameters!(request::Request, parameters::Dict; add::Bool = false) = 
+parsedict(d) = ["$k=$v" for (k, v) in d]
+setparameters!(request::Request, parameters::Dict; add::Bool=false) =
     setparameters!(request, parsedict(parameters); add=add)
 
 function setparameter!(request::Request, which::String, value)
-    which = strip(which); value = strip(string(value))
+    which = strip(which)
+    value = strip(string(value))
     params = getparameters(request)
     paramnames = [match(r".*(?=\=)", param).match for param in params]
     idx = findlast(x -> x == which, paramnames)
@@ -139,7 +140,7 @@ end
 
 setparameter!(request::Request, name_val::Pair) = setparameter!(request, name_val.first, name_val.second)
 
-function writestate(request::Request, file = "state.jsonl"; append = false)
+function writestate(request::Request, file="state.jsonl"; append=false)
     mode = append ? "a+" : "w+"
     open(file, mode) do io
         JSON.print(io, request.state)
@@ -160,20 +161,20 @@ function readstate!(request::Request, file)
 end
 
 function requestprotector(response::HTTP.Messages.Response,
-                        request::Request; verbose = false)
+    request::Request; verbose=false)
     code = response.status
     # Do not print success or ratelimit code
     code ∉ [200, 429] && verbose && println("Code: $code")
     if code ∈ 400:499
         code == 401 && newtoken!(request.token)
-        ratelimitprotect(response, verbose = verbose)
+        ratelimitprotect(response, verbose=verbose)
         tokenprotector!(request.token)
     elseif code ∈ 500:599
         sleeptime = request.sleeptime
         verbose && println("Chartmetric server error. Sleeping for $sleeptime seconds")
         sleep(sleeptime)
     elseif code ∉ 200:399
-        ratelimitprotect(response, verbose = verbose)
+        ratelimitprotect(response, verbose=verbose)
     end # if
     return code
 end # fun
