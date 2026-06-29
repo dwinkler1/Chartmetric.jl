@@ -1,7 +1,7 @@
 name = "Chartmetric"
 uuid = "5e0982d9-853c-416b-a9e6-ad7fe38a6229"
-authors = ["Daniel Winkler <dwinkler@wu.ac.at> and contributors"]
 version = "0.4.0"
+authors = ["Daniel Winkler <dwinkler@wu.ac.at> and contributors"]
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -9,7 +9,7 @@ HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
 [compat]
-HTTP = "^1.0"
+HTTP = "^1.0, 2"
 JSON = "0.21, 1"
 julia = "^1.6"
 
